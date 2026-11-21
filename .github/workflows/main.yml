@@ -1,0 +1,40 @@
+
+name: Build Jimmy AI APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ambil kode proyek
+        uses: actions/checkout@v4
+
+      - name: Siapkan Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Siapkan Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Beri izin Gradle
+        run: chmod +x ./gradlew
+
+      - name: Bangun APK
+        run: ./gradlew assembleDebug
+
+      - name: Simpan hasil APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jimmy-AI-APK
+          path: '**/build/outputs/apk/debug/*.apk'
+          if-no-files-found: error
+          
