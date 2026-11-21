@@ -26,9 +26,9 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-
-      - name: Bangun APK
-        run: gradle assembleDebug
+          
+     - name: Build APK and inspect errors
+        run: gradle assembleDebug --stacktrace
 
       - name: Simpan APK
         uses: actions/upload-artifact@v4
