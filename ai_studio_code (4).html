@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#050811">
+<title>JIMMY · Cybernetic AI</title>
+<style>
+:root{
+  --bg:#050811;--glass:rgba(13,22,40,.74);--glass-strong:rgba(11,19,35,.94);
+  --line:rgba(130,196,255,.16);--line-bright:rgba(104,225,255,.4);
+  --text:#f2f7ff;--muted:#8aa0c0;--cyan:#5ce8ff;--blue:#4b93ff;--teal:#36e2b4;
+  --aura:#38c7ff;--mouth-open:.15;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;overscroll-behavior:none}
+body{
+  background:
+    radial-gradient(ellipse 80% 55% at 50% 15%, rgba(30,104,215,.22), transparent 65%),
+    radial-gradient(circle at 82% 78%, rgba(45,212,191,.09), transparent 45%),
+    linear-gradient(180deg, #091020 0%, #050811 75%);
+}
+body::before{
+  content:"";position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.22;
+  background-image:linear-gradient(rgba(92,232,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(92,232,255,.07) 1px,transparent 1px);
+  background-size:36px 36px;
+  mask-image:radial-gradient(ellipse at 50% 45%,black 15%,transparent 78%);
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer;touch-action:manipulation}
+.hidden{display:none!important}
+
+/* LOGIN */
+.login-screen{position:fixed;inset:0;z-index:60;background:radial-gradient(ellipse at 50% 25%,#112b4f 0%,#070d1a 55%,#04070e 90%);display:grid;place-items:center;padding:20px;backdrop-filter:blur(16px)}
+.login-card{width:min(100%,390px);padding:30px 24px;border-radius:28px;background:linear-gradient(160deg,rgba(20,33,58,.92),rgba(10,17,32,.96));border:1px solid var(--line-bright);box-shadow:0 28px 80px rgba(0,0,0,.75);text-align:center}
+.login-emblem{width:68px;height:68px;margin:0 auto 16px;border-radius:22px;display:grid;place-items:center;background:linear-gradient(145deg,#122c4d,#09172a);border:1px solid rgba(92,232,255,.5);box-shadow:0 0 28px rgba(92,232,255,.25)}
+.login-emblem svg{width:38px;height:38px}
+.login-card h2{margin:0 0 6px;font-size:22px;font-weight:800;letter-spacing:.4px}
+.login-card p{margin:0 0 20px;font-size:13px;color:var(--muted)}
+.login-input{width:100%;height:50px;text-align:center;border-radius:15px;border:1px solid var(--line);background:rgba(5,10,20,.85);color:#fff;padding:0 14px;outline:none;margin-bottom:12px}
+.login-input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(92,232,255,.16)}
+.login-button{width:100%;height:50px;border:0;border-radius:15px;font-weight:750;font-size:14px;color:#041524;background:linear-gradient(135deg,#99f7ff,#4b93ff);box-shadow:0 10px 26px rgba(75,147,255,.32)}
+.login-button:disabled{opacity:.6;cursor:wait}
+#loginStatus{min-height:18px;margin-top:12px;font-size:12px;color:#ff9aa8}
+
+/* APP SHELL */
+.app{position:relative;z-index:1;max-width:560px;height:100dvh;margin:0 auto;padding:env(safe-area-inset-top) 12px env(safe-area-inset-bottom);display:flex;flex-direction:column;overflow:hidden}
+.topbar{height:56px;flex:0 0 56px;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:0 4px;z-index:5}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.brand-badge{width:36px;height:36px;border-radius:12px;display:grid;place-items:center;background:linear-gradient(145deg,#17355b,#0c1c33);border:1px solid rgba(92,232,255,.45);box-shadow:0 4px 18px rgba(75,147,255,.25);flex-shrink:0}
+.brand-name{font-size:15px;font-weight:800;letter-spacing:.5px;display:flex;align-items:center;gap:6px}
+.unit-tag{font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;background:rgba(92,232,255,.14);color:var(--cyan);border:1px solid rgba(92,232,255,.3)}
+.brand-sub{font-size:10.5px;color:var(--muted);margin-top:1px}
+.status-pill{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:rgba(13,26,44,.82);border:1px solid rgba(54,226,180,.32);color:#aef8e1;font-size:10px;font-weight:750;backdrop-filter:blur(10px)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--teal);box-shadow:0 0 10px var(--teal);animation:dotPulse 2s infinite}
+@keyframes dotPulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+/* MAIN STAGE */
+.stage-wrap{position:relative;flex:1 1 auto;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:2px 0 8px;overflow:hidden}
+.stage-hud-top{width:100%;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:0 2px;z-index:6;flex:0 0 auto}
+.hud-telemetry{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:999px;background:var(--glass);border:1px solid var(--line);backdrop-filter:blur(12px);font-size:10.5px;color:#cde4ff}
+.hud-telemetry span{color:var(--cyan);font-weight:700}
+.stage-btn-group{display:flex;gap:6px}
+.pill-btn{border:1px solid var(--line);border-radius:999px;padding:7px 12px;background:var(--glass);color:#eaf6ff;font-size:11px;font-weight:650;backdrop-filter:blur(12px);display:inline-flex;align-items:center;gap:5px}
+.pill-btn:active{transform:scale(.95)}
+.pill-btn.active{border-color:var(--cyan);background:rgba(22,56,92,.85);color:var(--cyan)}
+
+.pose-bar{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;padding:7px 10px;margin-top:6px;border-radius:16px;background:var(--glass-strong);border:1px solid var(--line-bright);backdrop-filter:blur(14px);z-index:7;box-shadow:0 12px 30px rgba(0,0,0,.45);animation:popIn .18s ease-out}
+.pose-chip{border:1px solid rgba(92,232,255,.26);background:rgba(30,66,110,.38);color:#e8f6ff;border-radius:999px;padding:5px 10px;font-size:11px;font-weight:600}
+
+.stage-bubble{position:relative;z-index:7;max-width:92%;margin:6px auto 0;padding:11px 16px;border-radius:18px;background:linear-gradient(155deg,rgba(18,34,60,.94),rgba(11,21,39,.94));border:1px solid rgba(92,232,255,.38);box-shadow:0 14px 36px rgba(0,0,0,.48);backdrop-filter:blur(14px);font-size:12.5px;line-height:1.48;color:#eef6ff;text-align:center;animation:popIn .22s ease-out}
+.stage-bubble-close{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:1px solid var(--line-bright);background:#162844;color:#d6ecff;font-size:11px;display:grid;place-items:center}
+@keyframes popIn{from{opacity:0;transform:translateY(6px) scale(.96)}to{opacity:1;transform:none}}
+
+/* ROBOT VIEWPORT */
+.robot-viewport{position:relative;flex:1 1 auto;min-height:0;width:100%;display:grid;place-items:center;overflow:visible}
+.robot-ambient{position:absolute;width:min(82vw,350px);height:min(82vw,350px);border-radius:50%;background:radial-gradient(circle,var(--aura) 0%,transparent 68%);opacity:.22;filter:blur(32px);transition:background .5s ease;pointer-events:none}
+.robot-svg-wrap{position:relative;height:100%;max-height:100%;width:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
+#robotAvatar{height:100%;max-height:100%;width:auto;max-width:100%;overflow:visible;filter:drop-shadow(0 22px 32px rgba(0,0,0,.68))}
+
+#robotAvatar[data-emotion="neutral"],#robotAvatar[data-emotion="calm"]{--aura:#38c7ff}
+#robotAvatar[data-emotion="happy"],#robotAvatar[data-emotion="excited"],#robotAvatar[data-emotion="laugh"]{--aura:#36e2b4}
+#robotAvatar[data-emotion="thinking"]{--aura:#a87dff}
+#robotAvatar[data-emotion="concerned"]{--aura:#f7b955}
+#robotAvatar[data-emotion="sad"]{--aura:#637eb5}
+#robotAvatar[data-emotion="surprised"]{--aura:#ff7cd1}
+
+#botWhole{transform-origin:180px 240px;transition:transform .35s ease}
+#botHeadGroup{transform-origin:180px 124px;transition:transform .38s cubic-bezier(.22,.9,.3,1)}
+#botArmLeft{transform-origin:112px 154px;transition:transform .38s cubic-bezier(.22,.9,.3,1)}
+#botArmRight{transform-origin:248px 154px;transition:transform .38s cubic-bezier(.22,.9,.3,1)}
+#botForearmLeft{transform-origin:100px 218px;transition:transform .32s cubic-bezier(.22,.9,.3,1)}
+#botForearmRight{transform-origin:260px 218px;transition:transform .32s cubic-bezier(.22,.9,.3,1)}
+#botLegLeft{transform-origin:152px 270px;transition:transform .38s ease}
+#botLegRight{transform-origin:208px 270px;transition:transform .38s ease}
+#botCoreSpinOuter{transform-origin:180px 186px;animation:spinCW 12s linear infinite}
+#botCoreSpinInner{transform-origin:180px 186px;animation:spinCCW 7s linear infinite}
+#botThrusterL,#botThrusterR{animation:thrusterPulse .26s ease-in-out infinite alternate}
+.holo-ring-spin{transform-origin:180px 426px;animation:spinCW 18s linear infinite}
+.holo-dot{animation:dotRise 3.8s ease-in-out infinite}
+.holo-dot.d2{animation-delay:1.2s}.holo-dot.d3{animation-delay:2.4s}
+
+.eye-optic-wrap{transform-origin:center;transform-box:fill-box;transition:transform .2s ease,opacity .18s ease}
+.eye-happy-arc,.eye-brow-sad,.eye-brow-think{opacity:0;transition:opacity .2s ease}
+#robotAvatar[data-emotion="happy"] .eye-optic-wrap,
+#robotAvatar[data-emotion="excited"] .eye-optic-wrap,
+#robotAvatar[data-emotion="laugh"] .eye-optic-wrap{opacity:0}
+#robotAvatar[data-emotion="happy"] .eye-happy-arc,
+#robotAvatar[data-emotion="excited"] .eye-happy-arc,
+#robotAvatar[data-emotion="laugh"] .eye-happy-arc{opacity:1}
+#robotAvatar[data-emotion="thinking"] .eye-brow-think{opacity:1}
+#robotAvatar[data-emotion="thinking"] .eye-r-optic{transform:scaleY(.64)}
+#robotAvatar[data-emotion="concerned"] .eye-brow-sad,
+#robotAvatar[data-emotion="sad"] .eye-brow-sad{opacity:1}
+#robotAvatar[data-emotion="sad"] .eye-optic-wrap{transform:scaleY(.68) translateY(2px)}
+#robotAvatar[data-emotion="surprised"] .eye-optic-wrap{transform:scale(1.18)}
+
+.mouth-idle{transition:opacity .12s ease}
+.mouth-eq{opacity:0;transition:opacity .12s ease}
+.mouth-eq rect{transform-origin:center;transform-box:fill-box;transition:transform .05s linear}
+#robotAvatar.speaking .mouth-idle{opacity:0}
+#robotAvatar.speaking .mouth-eq{opacity:1}
+#robotAvatar.speaking .eq-1{transform:scaleY(calc(.3 + var(--mouth-open)*.85))}
+#robotAvatar.speaking .eq-2{transform:scaleY(calc(.5 + var(--mouth-open)*1.3))}
+#robotAvatar.speaking .eq-3{transform:scaleY(calc(.7 + var(--mouth-open)*1.85))}
+#robotAvatar.speaking .eq-4{transform:scaleY(calc(.5 + var(--mouth-open)*1.3))}
+#robotAvatar.speaking .eq-5{transform:scaleY(calc(.3 + var(--mouth-open)*.85))}
+#robotAvatar.speaking #botHeadGroup{animation:headTalk .28s ease-in-out infinite alternate}
+#robotAvatar.speaking #botArmLeft{animation:talkArmL 1.1s ease-in-out infinite}
+#robotAvatar.speaking #botArmRight{animation:talkArmR 1.1s ease-in-out infinite}
+
+#botHelmetGroup{opacity:0;transform:translateY(-96px) scale(.94);transform-origin:180px 72px;transition:transform .6s cubic-bezier(.2,.85,.25,1),opacity .25s ease}
+#robotAvatar.helmet-on #botHelmetGroup{opacity:1;transform:translateY(0) scale(1)}
+
+#robotAvatar.gesture-wave #botArmRight{animation:armWaveUpper .52s ease-in-out 5}
+#robotAvatar.gesture-wave #botForearmRight{animation:armWaveLower .28s ease-in-out 10}
+#robotAvatar.gesture-wave #botHeadGroup{animation:headTiltHappy 1.3s ease-in-out 2}
+#robotAvatar.gesture-dance #botWhole{animation:botDanceBody .46s ease-in-out 8}
+#robotAvatar.gesture-dance #botArmLeft{animation:danceArmL .46s ease-in-out 8}
+#robotAvatar.gesture-dance #botArmRight{animation:danceArmR .46s ease-in-out 8}
+#robotAvatar.gesture-dance #botForearmLeft{transform:rotate(36deg)}
+#robotAvatar.gesture-dance #botForearmRight{transform:rotate(-36deg)}
+#robotAvatar.gesture-dance #botLegLeft{animation:danceLegL .46s ease-in-out 8}
+#robotAvatar.gesture-dance #botLegRight{animation:danceLegR .46s ease-in-out 8}
+#robotAvatar.gesture-happy #botWhole,#robotAvatar.gesture-laugh #botWhole{animation:botHappyBounce .44s ease-in-out 4}
+#robotAvatar.gesture-happy #botArmLeft,#robotAvatar.gesture-laugh #botArmLeft{transform:rotate(28deg)}
+#robotAvatar.gesture-happy #botArmRight,#robotAvatar.gesture-laugh #botArmRight{transform:rotate(-28deg)}
+#robotAvatar.gesture-happy #botForearmLeft,#robotAvatar.gesture-laugh #botForearmLeft{transform:rotate(42deg)}
+#robotAvatar.gesture-happy #botForearmRight,#robotAvatar.gesture-laugh #botForearmRight{transform:rotate(-42deg)}
+#robotAvatar.gesture-think #botHeadGroup{transform:rotate(9deg) translateY(3px)}
+#robotAvatar.gesture-think #botArmRight{transform:rotate(-56deg)}
+#robotAvatar.gesture-think #botForearmRight{transform:rotate(-88deg)}
+#robotAvatar.gesture-nod #botHeadGroup,#robotAvatar.gesture-hello #botHeadGroup{animation:headNod .45s ease-in-out 4}
+#robotAvatar.gesture-shake #botHeadGroup,#robotAvatar.gesture-no #botHeadGroup{animation:headShake .4s ease-in-out 4}
+#robotAvatar.gesture-sad #botHeadGroup{transform:rotate(-8deg) translateY(6px)}
+#robotAvatar.gesture-sad #botWhole{transform:translateY(8px)}
+#robotAvatar.gesture-right #botArmRight,#robotAvatar.gesture-raise_hand #botArmRight{transform:rotate(-118deg)}
+#robotAvatar.gesture-right #botForearmRight,#robotAvatar.gesture-raise_hand #botForearmRight{transform:rotate(-18deg)}
+#robotAvatar.gesture-left #botArmLeft{transform:rotate(118deg)}
+#robotAvatar.gesture-left #botForearmLeft{transform:rotate(18deg)}
+#robotAvatar.gesture-both #botArmLeft{transform:rotate(112deg)}
+#robotAvatar.gesture-both #botArmRight{transform:rotate(-112deg)}
+#robotAvatar.gesture-listen #botHeadGroup{transform:rotate(-7deg)}
+#robotAvatar.gesture-helmet-on #botArmRight,#robotAvatar.gesture-helmet-off #botArmRight{animation:armHelmet .65s ease-in-out 1}
+
+@keyframes spinCW{to{transform:rotate(360deg)}}
+@keyframes spinCCW{to{transform:rotate(-360deg)}}
+@keyframes thrusterPulse{from{opacity:.52;transform:scaleY(.84)}to{opacity:1;transform:scaleY(1.15)}}
+@keyframes dotRise{0%{transform:translateY(0);opacity:0}25%{opacity:.85}100%{transform:translateY(-72px);opacity:0}}
+@keyframes headTalk{from{transform:translateY(0) rotate(0)}to{transform:translateY(-1.5px) rotate(-1.5deg)}}
+@keyframes talkArmL{0%,100%{transform:rotate(2deg)}50%{transform:rotate(12deg)}}
+@keyframes talkArmR{0%,100%{transform:rotate(-2deg)}50%{transform:rotate(-12deg)}}
+@keyframes armWaveUpper{0%,100%{transform:rotate(0)}50%{transform:rotate(-108deg)}}
+@keyframes armWaveLower{0%,100%{transform:rotate(0)}50%{transform:rotate(-44deg)}}
+@keyframes headTiltHappy{0%,100%{transform:rotate(0)}50%{transform:rotate(6deg)}}
+@keyframes botDanceBody{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-11px) rotate(4deg)}}
+@keyframes danceArmL{0%,100%{transform:rotate(65deg)}50%{transform:rotate(-20deg)}}
+@keyframes danceArmR{0%,100%{transform:rotate(20deg)}50%{transform:rotate(-65deg)}}
+@keyframes danceLegL{0%,100%{transform:rotate(12deg)}50%{transform:rotate(-10deg)}}
+@keyframes danceLegR{0%,100%{transform:rotate(-12deg)}50%{transform:rotate(10deg)}}
+@keyframes botHappyBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+@keyframes headNod{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+@keyframes headShake{0%,100%{transform:translateX(0) rotate(0)}25%{transform:translateX(-5px) rotate(-7deg)}75%{transform:translateX(5px) rotate(7deg)}}
+@keyframes armHelmet{0%,100%{transform:rotate(0)}45%{transform:rotate(-78deg)}}
+
+.stage-status{text-align:center;flex:0 0 auto;margin-bottom:6px}
+.stage-status p{margin:0;font-size:12px;color:#b8cbe6;font-weight:500}
+
+/* QUICK COMMAND BAR & DOCK */
+.quick-bar{width:100%;display:flex;gap:8px;flex:0 0 auto;padding:0 2px;margin-bottom:8px;z-index:5}
+.quick-bar input{flex:1;min-width:0;height:46px;border-radius:16px;border:1px solid var(--line);background:rgba(11,19,35,.86);backdrop-filter:blur(12px);color:#fff;padding:0 15px;font-size:13px;outline:none}
+.quick-bar input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(92,232,255,.12)}
+.quick-send{width:46px;height:46px;flex:0 0 46px;border:0;border-radius:16px;background:linear-gradient(145deg,#8af4ff,#428eff);color:#041524;font-size:18px;font-weight:800;box-shadow:0 6px 18px rgba(66,142,255,.32)}
+
+.bottom-dock{flex:0 0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:6px;padding:6px;border-radius:22px;background:var(--glass-strong);border:1px solid var(--line);backdrop-filter:blur(16px);box-shadow:0 10px 30px rgba(0,0,0,.45);z-index:6}
+.dock-btn{border:0;border-radius:15px;padding:8px 4px;background:transparent;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10.5px;font-weight:650}
+.dock-btn span.ico{font-size:17px;line-height:1}
+.dock-btn.active,.dock-btn:hover{background:linear-gradient(145deg,rgba(42,92,155,.6),rgba(23,49,84,.8));color:#eef8ff}
+
+/* LAUNCHER & SLIDE-UP SHEETS */
+.menu-overlay{position:fixed;inset:0;z-index:30;background:rgba(3,6,14,.74);backdrop-filter:blur(12px);display:flex;align-items:flex-end;justify-content:center;padding:12px}
+.menu-sheet{width:min(100%,540px);background:linear-gradient(165deg,rgba(21,35,61,.96),rgba(11,18,34,.98));border:1px solid var(--line-bright);border-radius:28px;padding:18px;box-shadow:0 -12px 50px rgba(0,0,0,.7);animation:sheetUp .22s ease-out}
+@keyframes sheetUp{from{opacity:0;transform:translateY(28px)}to{opacity:1;transform:none}}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.sheet-title{font-size:16px;font-weight:750}
+.close-btn{width:34px;height:34px;border-radius:11px;border:1px solid var(--line);background:rgba(28,45,74,.8);color:#dcecff;font-size:15px;display:grid;place-items:center}
+.launcher-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.launcher-card{border:1px solid var(--line);border-radius:18px;padding:14px 12px;background:rgba(15,27,48,.86);color:var(--text);text-align:left;display:flex;align-items:center;gap:11px}
+.launcher-card:active{transform:scale(.97)}
+.launcher-ico{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;font-size:20px;background:linear-gradient(145deg,#204673,#122744);border:1px solid rgba(114,207,255,.22);flex-shrink:0}
+.launcher-name{font-size:13px;font-weight:700}
+.launcher-desc{font-size:10.5px;color:var(--muted);margin-top:2px}
+
+.panel-overlay{position:fixed;inset:0;z-index:25;background:rgba(3,7,15,.64);backdrop-filter:blur(8px);display:flex;flex-direction:column;justify-content:flex-end;align-items:center;padding:10px 10px calc(10px + env(safe-area-inset-bottom))}
+.feature-sheet{width:min(100%,560px);height:min(82dvh,690px);background:linear-gradient(165deg,rgba(17,29,51,.97),rgba(10,17,31,.99));border:1px solid var(--line-bright);border-radius:26px;box-shadow:0 -14px 55px rgba(0,0,0,.75);display:flex;flex-direction:column;overflow:hidden;animation:sheetUp .22s ease-out}
+.feature-sheet-head{flex:0 0 auto;padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:rgba(12,21,38,.9)}
+.feature-sheet-body{flex:1 1 auto;min-height:0;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:12px}
+.feature-view{display:none;flex:1 1 auto;min-height:0;flex-direction:column;gap:10px}
+.feature-view.active{display:flex}
+
+#chat{flex:1 1 auto;min-height:180px;overflow-y:auto;padding:4px;display:flex;flex-direction:column;gap:8px}
+.msg{max-width:86%;padding:11px 14px;border-radius:16px;font-size:13px;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere}
+.msg.user{align-self:flex-end;background:linear-gradient(135deg,#2568a8,#1a487a);border:1px solid rgba(130,198,255,.22);border-bottom-right-radius:5px}
+.msg.jimmy{align-self:flex-start;background:rgba(25,40,65,.9);border:1px solid rgba(145,196,255,.14);border-bottom-left-radius:5px}
+.chat-empty{margin:auto;text-align:center;color:var(--muted);font-size:13px;padding:24px}
+.chat-form{display:flex;gap:8px;flex:0 0 auto}
+.chat-form input{flex:1;min-width:0;height:46px;border-radius:14px;border:1px solid var(--line);background:#08101e;color:#fff;padding:0 14px;outline:none}
+.send{width:46px;height:46px;border:0;border-radius:14px;background:linear-gradient(145deg,#8af4ff,#428eff);color:#041524;font-size:18px;font-weight:800}
+
+.center-box{text-align:center;margin:auto 0;padding:10px 4px}
+.call-wrap{position:relative;width:124px;height:124px;margin:18px auto;display:grid;place-items:center}
+.call-halo{position:absolute;inset:0;border-radius:50%;border:1px solid rgba(92,232,255,.28);background:radial-gradient(circle,rgba(56,199,255,.18),transparent 70%)}
+.call-button{position:relative;width:86px;height:86px;border-radius:50%;border:1px solid rgba(160,224,255,.55);background:linear-gradient(145deg,#7deeff,#3478d4);color:#041626;font-size:30px;display:grid;place-items:center}
+.call-button:disabled{opacity:.6;cursor:wait}
+.call-button.end{background:linear-gradient(145deg,#f06b7d,#b82e49);color:#fff;border-color:#ffb0ba66}
+.call-wrap.active .call-halo{animation:pulse 1.8s infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.16);opacity:1}}
+.podcast-controls{display:flex;gap:8px;margin:12px 0}
+.podcast-controls input{flex:1;min-width:0;height:46px;border-radius:13px;border:1px solid var(--line);background:#08101e;color:#fff;padding:0 13px;outline:none}
+.podcast-button{height:46px;padding:0 18px;border:0;border-radius:13px;font-weight:750;color:#042019;background:linear-gradient(135deg,#72f0d2,#31ad91)}
+.podcast-button:disabled{opacity:.55}
+.podcast-stop{border:1px solid #ff758866;background:#61202e;color:#ffd0d7;border-radius:12px;padding:9px 14px;font-size:12px}
+
+.hud-box{background:rgba(9,16,30,.85);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+.hud-box span{display:block;font-size:10px;color:var(--muted);text-transform:uppercase}
+.hud-box strong{font-size:16px;color:var(--cyan)}
+.form-stack{display:flex;flex-direction:column;gap:8px}
+.form-stack input,.form-stack textarea,.form-stack select{width:100%;border-radius:12px;border:1px solid var(--line);background:#08101e;color:#fff;padding:10px 12px;font-size:12.5px;outline:none}
+.form-stack textarea{min-height:68px;resize:vertical}
+.row-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn-primary{border:0;border-radius:12px;padding:10px 13px;font-weight:700;font-size:12px;color:#041524;background:linear-gradient(135deg,#8af4ff,#4796ff)}
+.btn-secondary{border:1px solid var(--line);border-radius:12px;padding:10px 13px;font-weight:650;font-size:12px;background:#172742;color:#dbeaff}
+.btn-danger{border:1px solid #ff879944;border-radius:9px;padding:6px 10px;font-size:11px;background:#59212e;color:#ffd1d8}
+.item-list{display:flex;flex-direction:column;gap:8px}
+.item-card{background:rgba(10,18,34,.85);border:1px solid var(--line);border-radius:14px;padding:11px;display:flex;gap:10px;align-items:flex-start}
+.item-main{flex:1;min-width:0}
+.item-title{font-size:12.5px;font-weight:700;overflow-wrap:anywhere}
+.item-body{font-size:11.5px;color:var(--muted);margin-top:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+.item-meta{font-size:10px;color:#73bdf2;margin-top:5px}
+.task-done .item-title{text-decoration:line-through;color:#74859d}
+.task-check{width:18px;height:18px;accent-color:var(--teal);margin-top:2px}
+.status-note{font-size:11px;color:#8ad8ff;min-height:15px}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="login-screen" id="login">
+  <div class="login-card">
+    <div class="login-emblem">
+      <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="8" y="10" width="32" height="26" rx="11" fill="#071629" stroke="#5ce8ff" stroke-width="2.2"/>
+        <circle cx="18" cy="22" r="3.5" fill="#7df5ff"/>
+        <circle cx="30" cy="22" r="3.5" fill="#7df5ff"/>
+        <path d="M18 30 Q24 33 30 30" stroke="#5ce8ff" stroke-width="2.2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <h2>JIMMY ROBOT AI</h2>
+    <p>Unit pendamping digital, mentor &amp; asisten Owner.</p>
+    <input class="login-input" id="password" type="password" placeholder="Password Owner" autocomplete="current-password">
+    <button class="login-button" id="loginButton" onclick="login()">Aktifkan Jimmy</button>
+    <div id="loginStatus"></div>
+  </div>
+</div>
+
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-badge">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+          <rect x="3" y="5" width="18" height="14" rx="6" stroke="#5ce8ff" stroke-width="1.8"/>
+          <circle cx="9" cy="11.5" r="1.8" fill="#7cf4ff"/>
+          <circle cx="15" cy="11.5" r="1.8" fill="#7cf4ff"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">JIMMY <span class="unit-tag">UNIT-01</span></div>
+        <div class="brand-sub">Cybernetic Partner &amp; Assistant</div>
+      </div>
+    </div>
+    <div class="status-pill"><span class="dot"></span> <span id="connectionLabel">ONLINE</span></div>
+  </header>
+
+  <main class="stage-wrap" id="robotStage">
+    <div class="stage-hud-top">
+      <div class="hud-telemetry">CORE: <span id="coreStateText">STABIL</span></div>
+      <div class="stage-btn-group">
+        <button class="pill-btn" id="poseToggleBtn" type="button" onclick="togglePoseBar()">⚡ Aksi</button>
+        <button class="pill-btn" id="helmetToggle" type="button" onclick="toggleRobotHelmet()" aria-pressed="false">⛨ Helm: Off</button>
+      </div>
+    </div>
+
+    <div id="poseBar" class="pose-bar hidden">
+      <button class="pose-chip" type="button" onclick="demoPose('happy','wave','Unit Jimmy siap melayani, Bos!')">👋 Sapa</button>
+      <button class="pose-chip" type="button" onclick="demoPose('excited','dance','Kalibrasi servo ritmis aktif!')">💃 Joget</button>
+      <button class="pose-chip" type="button" onclick="demoPose('thinking','think','Memproses skenario optimal...')">🤔 Analisis</button>
+      <button class="pose-chip" type="button" onclick="demoPose('happy','happy','Indikator energi 100% optimal!')">😄 Senang</button>
+      <button class="pose-chip" type="button" onclick="demoPose('excited','both','Siaga penuh, tinggal kasih komando!')">🙌 Siaga</button>
+    </div>
+
+    <div id="stageBubble" class="stage-bubble hidden">
+      <button class="stage-bubble-close" type="button" onclick="hideStageBubble()" aria-label="Tutup">✕</button>
+      <div id="stageBubbleText"></div>
+    </div>
+
+    <div class="robot-viewport">
+      <div class="robot-ambient"></div>
+      <div class="robot-svg-wrap" onclick="pokeRobot()" title="Sentuh Jimmy">
+        <svg id="robotAvatar" data-emotion="happy" viewBox="0 0 360 460" xmlns="http://www.w3.org/2000/svg" aria-label="Robot Jimmy">
+          <defs>
+            <linearGradient id="tiLight" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#f7fcff"/><stop offset="22%" stop-color="#afc7da"/>
+              <stop offset="56%" stop-color="#48637d"/><stop offset="85%" stop-color="#1c2d40"/><stop offset="100%" stop-color="#0b1522"/>
+            </linearGradient>
+            <linearGradient id="tiCyl" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="#132131"/><stop offset="24%" stop-color="#7c98b0"/>
+              <stop offset="46%" stop-color="#eef8ff"/><stop offset="70%" stop-color="#4b6680"/><stop offset="100%" stop-color="#0d1826"/>
+            </linearGradient>
+            <linearGradient id="carbonDark" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#3c4f63"/><stop offset="42%" stop-color="#162334"/><stop offset="100%" stop-color="#060c14"/>
+            </linearGradient>
+            <linearGradient id="visorGlass" x1="0" y1="0" x2="0.2" y2="1">
+              <stop offset="0%" stop-color="#020812"/><stop offset="48%" stop-color="#0a2238"/><stop offset="100%" stop-color="#030a14"/>
+            </linearGradient>
+            <linearGradient id="glassShine" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ffffff" stop-opacity=".26"/><stop offset="45%" stop-color="#8deeff" stop-opacity=".06"/><stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+            </linearGradient>
+            <radialGradient id="corePlasma" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff"/><stop offset="28%" stop-color="#90f8ff"/>
+              <stop offset="65%" stop-color="#1aa0f5"/><stop offset="100%" stop-color="#07223d" stop-opacity="0"/>
+            </radialGradient>
+            <radialGradient id="opticIris" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff"/><stop offset="35%" stop-color="#7ef5ff"/>
+              <stop offset="80%" stop-color="#1496eb"/><stop offset="100%" stop-color="#083a66"/>
+            </radialGradient>
+            <linearGradient id="repulsor" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#b8fdff"/><stop offset="50%" stop-color="#2bb8ff" stop-opacity=".6"/><stop offset="100%" stop-color="#1b7cff" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="holoCone" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="#38c7ff" stop-opacity=".16"/><stop offset="100%" stop-color="#38c7ff" stop-opacity="0"/>
+            </linearGradient>
+            <filter id="neonGlow" x="-35%" y="-35%" width="170%" height="170%">
+              <feGaussianBlur stdDeviation="3.4" result="blur"/>
+              <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+            </filter>
+          </defs>
+
+          <polygon points="90,426 270,426 235,295 125,295" fill="url(#holoCone)"/>
+          <ellipse id="botShadow" cx="180" cy="430" rx="88" ry="15" fill="#000000" opacity=".68"/>
+          <g class="holo-ring-spin">
+            <ellipse cx="180" cy="426" rx="108" ry="19" fill="none" stroke="#4fdfff" stroke-width="1.6" stroke-opacity=".55" stroke-dasharray="14 7 4 7"/>
+          </g>
+          <ellipse cx="180" cy="426" rx="74" ry="12" fill="none" stroke="#9beeff" stroke-width="1.1" stroke-opacity=".42"/>
+          <circle class="holo-dot d1" cx="102" cy="412" r="2.2" fill="#82f6ff"/>
+          <circle class="holo-dot d2" cx="258" cy="408" r="2.4" fill="#82f6ff"/>
+          <circle class="holo-dot d3" cx="180" cy="418" r="2" fill="#d9feff"/>
+
+          <g id="botPhysicsFloat">
+            <g id="botWhole">
+              <g id="botLegLeft">
+                <circle cx="152" cy="272" r="13" fill="url(#carbonDark)" stroke="#7fa6c4" stroke-width="1.2"/>
+                <rect x="137" y="274" width="30" height="62" rx="13" fill="url(#tiCyl)" stroke="#b6d6ea" stroke-width="1.2"/>
+                <line x1="152" y1="282" x2="152" y2="328" stroke="#182a3d" stroke-width="2.5"/>
+                <circle cx="152" cy="338" r="12.5" fill="url(#carbonDark)" stroke="#68dfff" stroke-width="1.6"/>
+                <circle cx="152" cy="338" r="5" fill="#70f0ff" opacity=".75"/>
+                <path d="M139 344 L165 344 L162 400 L141 400 Z" fill="url(#tiCyl)" stroke="#a9cce2" stroke-width="1.2"/>
+                <line x1="145" y1="355" x2="145" y2="390" stroke="#5ce8ff" stroke-width="1.3" opacity=".65"/>
+                <path d="M131 397 Q152 389 169 398 L171 413 Q150 417 129 412 Z" fill="url(#carbonDark)" stroke="#b0d9ee" stroke-width="1.3"/>
+                <rect x="135" y="405" width="30" height="3.5" rx="1.5" fill="#5ce8ff" opacity=".5"/>
+                <ellipse id="botThrusterL" cx="150" cy="419" rx="13" ry="11" fill="url(#repulsor)"/>
+              </g>
+
+              <g id="botLegRight">
+                <circle cx="208" cy="272" r="13" fill="url(#carbonDark)" stroke="#7fa6c4" stroke-width="1.2"/>
+                <rect x="193" y="274" width="30" height="62" rx="13" fill="url(#tiCyl)" stroke="#b6d6ea" stroke-width="1.2"/>
+                <line x1="208" y1="282" x2="208" y2="328" stroke="#182a3d" stroke-width="2.5"/>
+                <circle cx="208" cy="338" r="12.5" fill="url(#carbonDark)" stroke="#68dfff" stroke-width="1.6"/>
+                <circle cx="208" cy="338" r="5" fill="#70f0ff" opacity=".75"/>
+                <path d="M195 344 L221 344 L219 400 L198 400 Z" fill="url(#tiCyl)" stroke="#a9cce2" stroke-width="1.2"/>
+                <line x1="215" y1="355" x2="215" y2="390" stroke="#5ce8ff" stroke-width="1.3" opacity=".65"/>
+                <path d="M191 398 Q208 389 229 397 L231 412 Q210 417 189 413 Z" fill="url(#carbonDark)" stroke="#b0d9ee" stroke-width="1.3"/>
+                <rect x="195" y="405" width="30" height="3.5" rx="1.5" fill="#5ce8ff" opacity=".5"/>
+                <ellipse id="botThrusterR" cx="210" cy="419" rx="13" ry="11" fill="url(#repulsor)"/>
+              </g>
+
+              <path d="M140 250 L220 250 L212 282 Q180 290 148 282 Z" fill="url(#carbonDark)" stroke="#92b9d4" stroke-width="1.3"/>
+              <path d="M150 254 L210 254 L204 268 L156 268 Z" fill="url(#tiLight)" opacity=".65"/>
+              <rect x="169" y="257" width="22" height="9" rx="4" fill="#5ce8ff" opacity=".82" filter="url(#neonGlow)"/>
+
+              <g id="botArmLeft">
+                <path d="M90 144 Q112 128 128 144 L126 172 Q105 178 90 165 Z" fill="url(#tiLight)" stroke="#d2eeff" stroke-width="1.4"/>
+                <circle cx="110" cy="156" r="10" fill="url(#carbonDark)" stroke="#68dfff" stroke-width="1.4"/>
+                <circle cx="110" cy="156" r="4" fill="#7cf4ff"/>
+                <rect x="97" y="168" width="24" height="50" rx="11" fill="url(#tiCyl)" stroke="#9fc4db" stroke-width="1.2"/>
+                <rect x="103" y="176" width="12" height="32" rx="5" fill="url(#carbonDark)"/>
+                <g id="botForearmLeft">
+                  <circle cx="109" cy="221" r="11" fill="url(#carbonDark)" stroke="#75e0ff" stroke-width="1.5"/>
+                  <path d="M97 227 L121 227 L119 276 L99 276 Z" fill="url(#tiCyl)" stroke="#b3d6ea" stroke-width="1.2"/>
+                  <line x1="103" y1="236" x2="103" y2="266" stroke="#5ce8ff" stroke-width="1.5" opacity=".7"/>
+                  <rect x="98" y="275" width="21" height="17" rx="6" fill="url(#carbonDark)" stroke="#bfe4f7" stroke-width="1.1"/>
+                  <path d="M100 292 L100 301 M105 292 L105 303 M110 292 L110 303 M115 292 L115 300 M119 282 L124 291" stroke="#a6cbe0" stroke-width="2.6" stroke-linecap="round"/>
+                </g>
+              </g>
+
+              <g id="botArmRight">
+                <path d="M270 144 Q248 128 232 144 L234 172 Q255 178 270 165 Z" fill="url(#tiLight)" stroke="#d2eeff" stroke-width="1.4"/>
+                <circle cx="250" cy="156" r="10" fill="url(#carbonDark)" stroke="#68dfff" stroke-width="1.4"/>
+                <circle cx="250" cy="156" r="4" fill="#7cf4ff"/>
+                <rect x="239" y="168" width="24" height="50" rx="11" fill="url(#tiCyl)" stroke="#9fc4db" stroke-width="1.2"/>
+                <rect x="245" y="176" width="12" height="32" rx="5" fill="url(#carbonDark)"/>
+                <g id="botForearmRight">
+                  <circle cx="251" cy="221" r="11" fill="url(#carbonDark)" stroke="#75e0ff" stroke-width="1.5"/>
+                  <path d="M239 227 L263 227 L261 276 L241 276 Z" fill="url(#tiCyl)" stroke="#b3d6ea" stroke-width="1.2"/>
+                  <line x1="257" y1="236" x2="257" y2="266" stroke="#5ce8ff" stroke-width="1.5" opacity=".7"/>
+                  <rect x="241" y="275" width="21" height="17" rx="6" fill="url(#carbonDark)" stroke="#bfe4f7" stroke-width="1.1"/>
+                  <path d="M260 292 L260 301 M255 292 L255 303 M250 292 L250 303 M245 292 L245 300 M241 282 L236 291" stroke="#a6cbe0" stroke-width="2.6" stroke-linecap="round"/>
+                </g>
+              </g>
+
+              <g id="botTorsoGroup">
+                <path d="M132 132 Q180 120 228 132 L238 144 Q180 135 122 144 Z" fill="url(#tiLight)" stroke="#dff4ff" stroke-width="1.3"/>
+                <path d="M122 142 Q180 130 238 142 L226 226 Q180 238 134 226 Z" fill="url(#tiLight)" stroke="#cde9f8" stroke-width="1.6"/>
+                <path d="M136 150 Q180 142 224 150 L215 215 Q180 224 145 215 Z" fill="url(#carbonDark)" stroke="#5b88a8" stroke-width="1"/>
+                <rect x="148" y="224" width="64" height="12" rx="5" fill="url(#tiCyl)" stroke="#8cb6d0" stroke-width="1"/>
+                <rect x="152" y="238" width="56" height="12" rx="5" fill="url(#carbonDark)" stroke="#6c94b0" stroke-width="1"/>
+                <circle cx="180" cy="186" r="27" fill="#061422" stroke="#b0dff5" stroke-width="2.2"/>
+                <g id="botCoreSpinOuter">
+                  <circle cx="180" cy="186" r="21" fill="none" stroke="#5be6ff" stroke-width="2.4" stroke-dasharray="9 6" filter="url(#neonGlow)"/>
+                </g>
+                <g id="botCoreSpinInner">
+                  <circle cx="180" cy="186" r="15" fill="none" stroke="#b2fbff" stroke-width="1.5" stroke-dasharray="4 5"/>
+                </g>
+                <circle id="botCoreGlow" cx="180" cy="186" r="13" fill="url(#corePlasma)" filter="url(#neonGlow)"/>
+                <path d="M138 156 L154 170 M222 156 L206 170" stroke="#5ce8ff" stroke-width="2" stroke-linecap="round" opacity=".8"/>
+                <path d="M142 198 L153 198 M207 198 L218 198" stroke="#5ce8ff" stroke-width="1.8" stroke-linecap="round" opacity=".55"/>
+              </g>
+
+              <g id="botNeck">
+                <rect x="166" y="110" width="28" height="24" rx="6" fill="url(#carbonDark)" stroke="#7aa3bf" stroke-width="1.1"/>
+                <line x1="162" y1="112" x2="156" y2="133" stroke="#9fc4db" stroke-width="4" stroke-linecap="round"/>
+                <line x1="198" y1="112" x2="204" y2="133" stroke="#9fc4db" stroke-width="4" stroke-linecap="round"/>
+                <line x1="170" y1="122" x2="190" y2="122" stroke="#5be6ff" stroke-width="1.5" opacity=".7"/>
+              </g>
+
+              <g id="botHeadLook">
+                <g id="botHeadGroup">
+                  <rect x="108" y="54" width="15" height="38" rx="7" fill="url(#tiCyl)" stroke="#c7ebfa" stroke-width="1.2"/>
+                  <rect x="237" y="54" width="15" height="38" rx="7" fill="url(#tiCyl)" stroke="#c7ebfa" stroke-width="1.2"/>
+                  <rect x="112" y="65" width="4" height="16" rx="2" fill="#5be6ff" filter="url(#neonGlow)"/>
+                  <rect x="244" y="65" width="4" height="16" rx="2" fill="#5be6ff" filter="url(#neonGlow)"/>
+
+                  <path d="M122 52 Q122 18 180 18 Q238 18 238 52 L235 94 Q232 118 180 118 Q128 118 125 94 Z" fill="url(#tiLight)" stroke="#e1f5ff" stroke-width="1.8"/>
+                  <path d="M156 19 Q180 12 204 19 L197 30 L163 30 Z" fill="#dff6ff" stroke="#7fb3d1" stroke-width="1"/>
+                  <path d="M126 56 L134 60 M234 56 L226 60" stroke="#243a50" stroke-width="1.5"/>
+
+                  <rect x="132" y="38" width="96" height="68" rx="26" fill="url(#visorGlass)" stroke="#52dfff" stroke-width="1.8" filter="url(#neonGlow)"/>
+                  <path d="M138 52 Q140 42 158 42 L205 42 L152 96 Q137 92 137 74 Z" fill="url(#glassShine)"/>
+
+                  <g id="botEyes" filter="url(#neonGlow)">
+                    <g id="botOpticTrack">
+                      <g class="eye-optic-wrap eye-l-optic">
+                        <g id="botEyeBlinkL">
+                          <circle cx="158" cy="66" r="12" fill="#051c30" stroke="#45d8ff" stroke-width="1.6"/>
+                          <circle cx="158" cy="66" r="8.5" fill="url(#opticIris)"/>
+                          <circle cx="158" cy="66" r="10.5" fill="none" stroke="#9cf7ff" stroke-width=".9" stroke-dasharray="3 3"/>
+                          <circle cx="161" cy="63" r="2.6" fill="#ffffff"/>
+                        </g>
+                      </g>
+                      <g class="eye-optic-wrap eye-r-optic">
+                        <g id="botEyeBlinkR">
+                          <circle cx="202" cy="66" r="12" fill="#051c30" stroke="#45d8ff" stroke-width="1.6"/>
+                          <circle cx="202" cy="66" r="8.5" fill="url(#opticIris)"/>
+                          <circle cx="202" cy="66" r="10.5" fill="none" stroke="#9cf7ff" stroke-width=".9" stroke-dasharray="3 3"/>
+                          <circle cx="205" cy="63" r="2.6" fill="#ffffff"/>
+                        </g>
+                      </g>
+                    </g>
+
+                    <path class="eye-happy-arc" d="M146 69 Q158 55 170 69" fill="none" stroke="#80f6ff" stroke-width="4.2" stroke-linecap="round"/>
+                    <path class="eye-happy-arc" d="M190 69 Q202 55 214 69" fill="none" stroke="#80f6ff" stroke-width="4.2" stroke-linecap="round"/>
+                    <line class="eye-brow-think" x1="189" y1="50" x2="214" y2="54" stroke="#a6f7ff" stroke-width="2.8" stroke-linecap="round"/>
+                    <path class="eye-brow-sad" d="M146 56 L169 50 M214 56 L191 50" stroke="#9beeff" stroke-width="2.8" stroke-linecap="round"/>
+                  </g>
+
+                  <g id="botMouth" filter="url(#neonGlow)">
+                    <path class="mouth-idle" d="M163 90 Q180 96 197 90" fill="none" stroke="#76f2ff" stroke-width="2.8" stroke-linecap="round"/>
+                    <g class="mouth-eq">
+                      <rect class="eq-1" x="162" y="85" width="4.5" height="10" rx="2.2" fill="#7cf4ff"/>
+                      <rect class="eq-2" x="170" y="85" width="4.5" height="10" rx="2.2" fill="#7cf4ff"/>
+                      <rect class="eq-3" x="178" y="85" width="4.5" height="10" rx="2.2" fill="#ffffff"/>
+                      <rect class="eq-4" x="186" y="85" width="4.5" height="10" rx="2.2" fill="#7cf4ff"/>
+                      <rect class="eq-5" x="194" y="85" width="4.5" height="10" rx="2.2" fill="#7cf4ff"/>
+                    </g>
+                  </g>
+
+                  <g id="botHelmetGroup">
+                    <path d="M117 52 Q117 14 180 14 Q243 14 243 52 L240 97 Q236 122 180 122 Q124 122 120 97 Z" fill="url(#tiLight)" stroke="#eafaff" stroke-width="2"/>
+                    <rect x="165" y="23" width="30" height="22" rx="7" fill="#071e34" stroke="#62ecff" stroke-width="1.5"/>
+                    <text x="180" y="39" text-anchor="middle" fill="#b4fbff" font-size="14" font-weight="900">N</text>
+                    <path d="M128 54 L232 54 L224 94 Q180 104 136 94 Z" fill="#04111f" stroke="#62ecff" stroke-width="2" filter="url(#neonGlow)"/>
+                    <path d="M140 66 L172 69 L188 69 L220 66" fill="none" stroke="#9ff8ff" stroke-width="2.6" stroke-linecap="round"/>
+                  </g>
+                </g>
+              </g>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+
+    <div class="stage-status">
+      <p id="heroStatus">Unit Jimmy siap menerima instruksi, Bos.</p>
+    </div>
+
+    <div class="quick-bar">
+      <input id="quickMessage" placeholder="Kirim pesan atau komando (misal: joget / pakai helm)..." autocomplete="off" onkeydown="if(event.key==='Enter')sendQuickMessage()">
+      <button class="quick-send" type="button" onclick="sendQuickMessage()" aria-label="Kirim">➤</button>
+    </div>
+
+    <nav class="bottom-dock" aria-label="Menu Utama">
+      <button class="dock-btn" data-panel="chatPanel" onclick="openFeature('chatPanel',this)">
+        <span class="ico">💬</span><span>Chat</span>
+      </button>
+      <button class="dock-btn" data-panel="voicePanel" onclick="openFeature('voicePanel',this)">
+        <span class="ico">🎙️</span><span>Suara</span>
+      </button>
+      <button class="dock-btn" data-panel="podcastPanel" onclick="openFeature('podcastPanel',this)">
+        <span class="ico">🎧</span><span>Podcast</span>
+      </button>
+      <button class="dock-btn" id="menuLauncherBtn" onclick="openMenuLauncher()">
+        <span class="ico">☰</span><span>Menu</span>
+      </button>
+    </nav>
+  </main>
+</div>
+
+<div id="menuOverlay" class="menu-overlay hidden" onclick="if(event.target===this)closeMenuLauncher()">
+  <div class="menu-sheet">
+    <div class="sheet-head">
+      <div class="sheet-title">Modul Sistem Jimmy</div>
+      <button class="close-btn" type="button" onclick="closeMenuLauncher()">✕</button>
+    </div>
+    <div class="launcher-grid">
+      <button class="launcher-card" onclick="openFeature('chatPanel')">
+        <div class="launcher-ico">💬</div>
+        <div><div class="launcher-name">Chat Teks</div><div class="launcher-desc">Partner &amp; mentor</div></div>
+      </button>
+      <button class="launcher-card" onclick="openFeature('voicePanel')">
+        <div class="launcher-ico">🎙️</div>
+        <div><div class="launcher-name">Suara Live</div><div class="launcher-desc">Komunikasi real-time</div></div>
+      </button>
+      <button class="launcher-card" onclick="openFeature('podcastPanel')">
+        <div class="launcher-ico">🎧</div>
+        <div><div class="launcher-name">Studio Podcast</div><div class="launcher-desc">Siaran topik pilihan</div></div>
+      </button>
+      <button class="launcher-card" onclick="openFeature('memoryPanel')">
+        <div class="launcher-ico">🧠</div>
+        <div><div class="launcher-name">Memori Inti</div><div class="launcher-desc">Lencana &amp; arsip D1</div></div>
+      </button>
+      <button class="launcher-card" onclick="openFeature('tasksPanel')">
+        <div class="launcher-ico">✅</div>
+        <div><div class="launcher-name">Daftar Tugas</div><div class="launcher-desc">Task Manager</div></div>
+      </button>
+      <button class="launcher-card" onclick="openFeature('notesPanel')">
+        <div class="launcher-ico">📝</div>
+        <div><div class="launcher-name">Catatan Pribadi</div><div class="launcher-desc">Log ide &amp; strategi</div></div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<div id="panelOverlay" class="panel-overlay hidden" onclick="if(event.target===this)closeFeaturePanel()">
+  <div class="feature-sheet">
+    <div class="feature-sheet-head">
+      <div class="sheet-title" id="sheetTitle">Percakapan</div>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="pill-btn" type="button" onclick="closeFeaturePanel();openMenuLauncher()">☰ Menu</button>
+        <button class="close-btn" type="button" onclick="closeFeaturePanel()" aria-label="Tutup">✕</button>
+      </div>
+    </div>
+
+    <div class="feature-sheet-body">
+      <section class="feature-view" id="chatPanel">
+        <div id="chat"><div class="chat-empty" id="emptyChat">Unit Jimmy siap. Mulai percakapan dengan Bos di sini.</div></div>
+        <div class="chat-form">
+          <input id="message" placeholder="Tulis pesan ke Jimmy..." autocomplete="off" onkeydown="if(event.key==='Enter')sendMessage()">
+          <button class="send" type="button" onclick="sendMessage()" aria-label="Kirim">➤</button>
+        </div>
+      </section>
+
+      <section class="feature-view" id="voicePanel">
+        <div class="center-box">
+          <h3 style="margin:0 0 6px;">Komunikasi Suara Real-Time</h3>
+          <p style="margin:0 0 10px;font-size:12px;color:var(--muted);">Bicara langsung dengan Jimmy; sensor suara dan mulut robot aktif otomatis.</p>
+          <div class="call-wrap" id="callWrap">
+            <div class="call-halo"></div>
+            <button class="call-button" id="callButton" type="button" onclick="toggleCallButton()" aria-label="Mulai panggilan">☎</button>
+          </div>
+          <div id="status" style="font-size:13px;font-weight:600;">Koneksi suara belum dimulai.</div>
+          <div id="statusSub" style="font-size:11.5px;color:var(--muted);margin-top:4px;">Mikrofon dalam mode siaga.</div>
+        </div>
+      </section>
+
+      <section class="feature-view" id="podcastPanel">
+        <div class="center-box" style="text-align:left;">
+          <h3 style="margin:0 0 6px;">Studio Podcast Jimmy</h3>
+          <p style="margin:0 0 12px;font-size:12px;color:var(--muted);">Tentukan topik, dan Jimmy akan menyiarkannya sambil reaktor dada &amp; vocalizer bergerak sinkron.</p>
+          <div class="podcast-controls">
+            <input id="podcastTopic" placeholder="Contoh: masa depan robotika &amp; AI...">
+            <button class="podcast-button" id="podcastStart" type="button" onclick="startPodcast()">Putar</button>
+          </div>
+          <button class="podcast-stop hidden" id="podcastStop" type="button" onclick="stopCall()">Hentikan Podcast</button>
+          <div id="podcastInfo" style="font-size:11.5px;color:var(--muted);margin-top:10px;">Podcast akan diputar melalui sistem audio Jimmy.</div>
+        </div>
+      </section>
+
+      <section class="feature-view" id="memoryPanel">
+        <div style="display:flex;gap:8px;">
+          <div class="hud-box" style="flex:1"><span>Lencana Memori</span><strong id="memoryTotal">0</strong></div>
+          <div class="hud-box" style="flex:1"><span>Penyimpanan</span><strong>Cloud D1</strong></div>
+        </div>
+        <div style="display:flex;gap:7px;">
+          <input id="memorySearch" style="flex:1;min-width:0;border-radius:12px;border:1px solid var(--line);background:#08101e;color:#fff;padding:10px 12px;font-size:12px;" placeholder="Cari ingatan..." onkeydown="if(event.key==='Enter')searchMemory()">
+          <button class="btn-secondary" type="button" onclick="searchMemory()">Cari</button>
+        </div>
+        <div class="item-list" id="memoryList"></div>
+        <div style="display:flex;gap:7px;margin-top:auto;">
+          <input id="memoryNew" style="flex:1;min-width:0;border-radius:12px;border:1px solid var(--line);background:#08101e;color:#fff;padding:10px 12px;font-size:12px;" placeholder="Masukkan data baru untuk diingat...">
+          <button class="btn-primary" type="button" onclick="saveMemory()">Simpan</button>
+        </div>
+        <div class="status-note" id="memoryStatus"></div>
+      </section>
+
+      <section class="feature-view" id="tasksPanel">
+        <form class="form-stack" id="taskForm" onsubmit="saveTask(event)">
+          <input id="taskTitle" maxlength="180" placeholder="Apa yang perlu dikerjakan?" required>
+          <textarea id="taskDescription" maxlength="3000" placeholder="Detail tugas (opsional)"></textarea>
+          <div class="row-2">
+            <select id="taskPriority">
+              <option value="normal">Prioritas normal</option>
+              <option value="high">Prioritas tinggi</option>
+              <option value="low">Prioritas rendah</option>
+            </select>
+            <input id="taskDueDate" type="date">
+          </div>
+          <div class="row-2">
+            <button class="btn-primary" id="taskSaveButton" type="submit">Tambah tugas</button>
+            <button class="btn-secondary" type="button" onclick="resetTaskForm()">Bersihkan</button>
+          </div>
+        </form>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <strong style="font-size:12.5px;" id="taskCount">0 tugas</strong>
+          <select id="taskFilter" style="border-radius:9px;border:1px solid var(--line);background:#08101e;color:#fff;padding:6px 10px;font-size:11.5px;" onchange="loadTasks()">
+            <option value="all">Semua</option>
+            <option value="open">Belum selesai</option>
+            <option value="done">Selesai</option>
+          </select>
+        </div>
+        <div class="item-list" id="taskList"></div>
+        <div class="status-note" id="taskStatus"></div>
+      </section>
+
+      <section class="feature-view" id="notesPanel">
+        <form class="form-stack" id="noteForm" onsubmit="saveNote(event)">
+          <input id="noteTitle" maxlength="180" placeholder="Judul catatan" required>
+          <textarea id="noteContent" maxlength="12000" placeholder="Tulis ide atau catatan penting..." required></textarea>
+          <div class="row-2">
+            <button class="btn-primary" id="noteSaveButton" type="submit">Simpan catatan</button>
+            <button class="btn-secondary" type="button" onclick="resetNoteForm()">Catatan baru</button>
+          </div>
+        </form>
+        <strong style="font-size:12.5px;" id="noteCount">0 catatan</strong>
+        <div class="item-list" id="noteList"></div>
+        <div class="status-note" id="noteStatus"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const WORKER_URL = "https://jimmy-ai.adrianakbar0202.workers.dev";
+let ownerPassword = "";
+let socket = null, audioContext = null, microphone = null, processor = null, micSource = null;
+let audioSources = [], nextPlayTime = 0, calling = false;
+let pendingUserText = "", pendingJimmyText = "", lastVoiceAction = null, suppressActionSpeech = false;
+let callStartedAt = 0, statusTimer = null, analyser = null, analyserData = null, mouthFrame = 0;
+let podcastMode = false, podcastTopic = "", podcastPart = 0, podcastMaxParts = 12, podcastStopped = false;
+
+const PANEL_TITLES = {
+  chatPanel: "💬 Percakapan Jimmy",
+  voicePanel: "🎙️ Komunikasi Suara",
+  podcastPanel: "🎧 Studio Podcast",
+  memoryPanel: "🧠 Memori Inti Jimmy",
+  tasksPanel: "✅ Daftar Tugas",
+  notesPanel: "📝 Catatan Pribadi"
+};
+
+/* ====== PROCEDURAL PHYSICS & EYE-TRACKING ENGINE ====== */
+const rig = {
+  targetX: 0, targetY: 0, curX: 0, curY: 0, lastPointerAt: 0,
+  reducedMotion: window.matchMedia?.("(prefers-reduced-motion: reduce)").matches
+};
+
+function updateLookTarget(clientX, clientY) {
+  const stage = document.getElementById("robotStage");
+  if (!stage) return;
+  const r = stage.getBoundingClientRect();
+  rig.targetX = Math.max(-1, Math.min(1, ((clientX - r.left) / r.width - 0.5) * 2));
+  rig.targetY = Math.max(-1, Math.min(1, ((clientY - r.top) / r.height - 0.42) * 2));
+  rig.lastPointerAt = performance.now();
+}
+
+window.addEventListener("pointermove", e => updateLookTarget(e.clientX, e.clientY), { passive: true });
+window.addEventListener("pointerdown", e => updateLookTarget(e.clientX, e.clientY), { passive: true });
+
+function startRobotPhysics() {
+  if (rig.reducedMotion) return;
+  const floatGroup = document.getElementById("botPhysicsFloat");
+  const headLook = document.getElementById("botHeadLook");
+  const opticTrack = document.getElementById("botOpticTrack");
+  const shadow = document.getElementById("botShadow");
+  const coreGlow = document.getElementById("botCoreGlow");
+
+  function tick(now) {
+    if (now - rig.lastPointerAt > 2600) {
+      rig.targetX = Math.sin(now * 0.00055) * 0.16;
+      rig.targetY = Math.cos(now * 0.00042) * 0.08;
+    }
+    rig.curX += (rig.targetX - rig.curX) * 0.085;
+    rig.curY += (rig.targetY - rig.curY) * 0.085;
+
+    const hoverY = Math.sin(now * 0.0022) * 6.5;
+    const tiltBody = Math.sin(now * 0.0011) * 1.1;
+    if (floatGroup) floatGroup.setAttribute("transform", `translate(0 ${hoverY.toFixed(2)}) rotate(${tiltBody.toFixed(2)} 180 230)`);
+    if (shadow) shadow.setAttribute("transform", `translate(180 430) scale(${(1 - hoverY / 110).toFixed(3)} 1) translate(-180 -430)`);
+    if (headLook) headLook.setAttribute("transform", `translate(${(rig.curX * 2.2).toFixed(2)} ${(rig.curY * 2.4).toFixed(2)}) rotate(${(rig.curX * 5.5).toFixed(2)} 180 112)`);
+    if (opticTrack) opticTrack.setAttribute("transform", `translate(${(rig.curX * 4.5).toFixed(2)} ${(rig.curY * 3.5).toFixed(2)})`);
+    if (coreGlow && !calling) coreGlow.setAttribute("opacity", (0.85 + Math.sin(now * 0.004) * 0.15).toFixed(2));
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+
+  const eyeL = document.getElementById("botEyeBlinkL");
+  const eyeR = document.getElementById("botEyeBlinkR");
+  function doBlink(double = false) {
+    if (eyeL && eyeR) {
+      eyeL.setAttribute("transform", "translate(158 66) scale(1 0.08) translate(-158 -66)");
+      eyeR.setAttribute("transform", "translate(202 66) scale(1 0.08) translate(-202 -66)");
+      setTimeout(() => {
+        eyeL.setAttribute("transform", "");
+        eyeR.setAttribute("transform", "");
+        if (double) setTimeout(() => doBlink(false), 140);
+      }, 125);
+    }
+  }
+  (function scheduleBlink() {
+    setTimeout(() => { doBlink(Math.random() < 0.18); scheduleBlink(); }, 2300 + Math.random() * 3400);
+  })();
+}
+startRobotPhysics();
+
+/* ====== MENU & SHEET NAVIGATION ====== */
+function openMenuLauncher() { document.getElementById("menuOverlay").classList.remove("hidden"); }
+function closeMenuLauncher() { document.getElementById("menuOverlay").classList.add("hidden"); }
+function openFeature(panelId, dockBtn = null) {
+  closeMenuLauncher();
+  document.getElementById("panelOverlay").classList.remove("hidden");
+  document.getElementById("sheetTitle").textContent = PANEL_TITLES[panelId] || "Jimmy";
+  document.querySelectorAll(".feature-view").forEach(v => v.classList.toggle("active", v.id === panelId));
+  document.querySelectorAll(".dock-btn").forEach(b => b.classList.toggle("active", b.dataset.panel === panelId || b === dockBtn));
+  if (panelId === "memoryPanel" && ownerPassword) loadMemoryBadges();
+  if (panelId === "tasksPanel" && ownerPassword) loadTasks();
+  if (panelId === "notesPanel" && ownerPassword) loadNotes();
+}
+function closeFeaturePanel() {
+  document.getElementById("panelOverlay").classList.add("hidden");
+  document.querySelectorAll(".dock-btn").forEach(b => b.classList.remove("active"));
+}
+
+function togglePoseBar() {
+  const bar = document.getElementById("poseBar");
+  bar.classList.toggle("hidden");
+  document.getElementById("poseToggleBtn").classList.toggle("active", !bar.classList.contains("hidden"));
+}
+function demoPose(emotion, gesture, text) {
+  setRobotEmotion(emotion);
+  setRobotAction(gesture);
+  document.getElementById("heroStatus").textContent = text;
+  document.getElementById("poseBar").classList.add("hidden");
+  document.getElementById("poseToggleBtn").classList.remove("active");
+}
+
+let bubbleTimer = null;
+function showStageBubble(text) {
+  if (!text) return;
+  const box = document.getElementById("stageBubble");
+  document.getElementById("stageBubbleText").textContent = text;
+  box.classList.remove("hidden");
+  if (bubbleTimer) clearTimeout(bubbleTimer);
+  bubbleTimer = setTimeout(() => box.classList.add("hidden"), 10000);
+}
+function hideStageBubble() { document.getElementById("stageBubble").classList.add("hidden"); }
+
+/* ====== ROBOT EMOTION, GESTURE & SFX ====== */
+let robotActionTimer = null;
+function setRobotEmotion(emotion = "happy") {
+  const robot = document.getElementById("robotAvatar");
+  if (robot) robot.setAttribute("data-emotion", emotion || "neutral");
+  const labels = {
+    neutral: "STABIL", calm: "TENANG", happy: "OPTIMAL", excited: "ENERGI PENUH",
+    laugh: "GEMBIRA", thinking: "MEMPROSES", concerned: "WASPADA", sad: "DAYA RENDAH", surprised: "TERDETEKSI"
+  };
+  document.getElementById("coreStateText").textContent = labels[emotion] || "STABIL";
+}
+
+function setRobotGesture(gesture = "idle", duration = 3200) {
+  const robot = document.getElementById("robotAvatar");
+  if (!robot) return;
+  const classes = [
+    "gesture-wave","gesture-hello","gesture-happy","gesture-laugh","gesture-dance",
+    "gesture-think","gesture-nod","gesture-shake","gesture-no","gesture-sad",
+    "gesture-right","gesture-left","gesture-both","gesture-raise_hand","gesture-listen",
+    "gesture-helmet-on","gesture-helmet-off"
+  ];
+  robot.classList.remove(...classes);
+  if (robotActionTimer) clearTimeout(robotActionTimer);
+  if (gesture && gesture !== "idle") {
+    robot.classList.add("gesture-" + gesture);
+    robotActionTimer = setTimeout(() => robot.classList.remove("gesture-" + gesture), duration);
+  }
+}
+
+function extractInlineAvatarTag(rawText = "") {
+  const re = /\[\[avatar([^\]]*)\]\]/gi;
+  let emotion = null, gesture = null, m;
+  while ((m = re.exec(rawText))) {
+    const e = /emotion=([a-z_]+)/i.exec(m[1]);
+    const g = /gesture=([a-z_]+)/i.exec(m[1]);
+    if (e) emotion = e[1].toLowerCase();
+    if (g) gesture = g[1].toLowerCase();
+  }
+  return { cleanText: rawText.replace(re, "").trim(), avatar: (emotion || gesture) ? { emotion, gesture } : null };
+}
+
+function inferMoodFromReply(text = "") {
+  const t = text.toLowerCase();
+  if (/(haha|wkwk|hehe|lucu|mantap|keren|asik|semangat|selamat|hore)/.test(t)) return { emotion: "happy", gesture: "happy" };
+  if (/(halo|hai|pagi|siang|sore|malam|apa kabar)/.test(t)) return { emotion: "happy", gesture: "wave" };
+  if (/(hmm|pertimbangkan|analisis|menurut gue|risiko|strategi|rencana|data)/.test(t)) return { emotion: "thinking", gesture: "think" };
+  if (/(maaf|waduh|hati-hati|bahaya|khawatir|sedih)/.test(t)) return { emotion: "concerned", gesture: "nod" };
+  if (/(setuju|betul|iya|bener|oke|siap)/.test(t)) return { emotion: "happy", gesture: "nod" };
+  return { emotion: "happy", gesture: "idle" };
+}
+
+function applyAvatar(avatar) {
+  if (!avatar) return;
+  if (avatar.emotion) setRobotEmotion(avatar.emotion);
+  if (avatar.gesture && avatar.gesture !== "idle") {
+    const durMap = { wave: 3000, dance: 4200, laugh: 2400, happy: 2200, think: 3000, nod: 1800, shake: 1800, raise_hand: 3000 };
+    setRobotGesture(avatar.gesture, durMap[avatar.gesture] || 2400);
+  }
+}
+
+function pokeRobot() {
+  const reactions = [
+    { emotion: "happy", gesture: "wave", msg: "Sensor aktif! Ada komando atau ide baru, Bos?" },
+    { emotion: "excited", gesture: "dance", msg: "Servo siap tempur! Jimmy on duty!" },
+    { emotion: "thinking", gesture: "think", msg: "Hmm... sistem lagi menganalisis langkah terbaik buat lo." }
+  ];
+  const pick = reactions[Math.floor(Math.random() * reactions.length)];
+  setRobotEmotion(pick.emotion);
+  setRobotAction(pick.gesture);
+  document.getElementById("heroStatus").textContent = pick.msg;
+}
+
+let robotSfxContext = null, robotSfxMaster = null, robotSfxNodes = [], robotSfxTimer = null, robotSfxRun = 0, robotSfxOwnContext = false;
+function stopRobotMovementSfx() {
+  robotSfxRun++;
+  if (robotSfxTimer) { clearTimeout(robotSfxTimer); robotSfxTimer = null; }
+  const ctx = robotSfxContext, master = robotSfxMaster, nodes = robotSfxNodes, ownsContext = robotSfxOwnContext;
+  robotSfxContext = null; robotSfxMaster = null; robotSfxNodes = []; robotSfxOwnContext = false;
+  if (ctx && master && ctx.state !== "closed") {
+    try { master.gain.setTargetAtTime(0, ctx.currentTime, 0.025); } catch (e) {}
+    setTimeout(() => {
+      for (const n of nodes) { try { n.stop(); } catch (e) {} try { n.disconnect(); } catch (e) {} }
+      try { master.disconnect(); } catch (e) {}
+      if (ownsContext) { try { ctx.close(); } catch (e) {} }
+    }, 120);
+  }
+}
+
+async function playRobotMovementSfx(duration = 2400) {
+  stopRobotMovementSfx();
+  if (rig.reducedMotion) return;
+  const AudioCtx = window.AudioContext || window.webkitAudioContext;
+  if (!AudioCtx) return;
+  const run = robotSfxRun;
+  try {
+    const sharedContext = audioContext && audioContext.state !== "closed";
+    const ctx = sharedContext ? audioContext : new AudioCtx();
+    robotSfxContext = ctx; robotSfxOwnContext = !sharedContext;
+    if (ctx.state === "suspended") await ctx.resume();
+    if (run !== robotSfxRun || ctx !== robotSfxContext || ctx.state !== "running") {
+      if (!sharedContext) { try { await ctx.close(); } catch (e) {} }
+      return;
+    }
+    const master = ctx.createGain();
+    master.gain.value = 0.22;
+    master.connect(ctx.destination);
+    robotSfxMaster = master;
+    const count = Math.max(2, Math.min(6, Math.floor(duration / 550)));
+    for (let i = 0; i < count; i++) {
+      const t = ctx.currentTime + 0.04 + i * 0.48;
+      const servo = ctx.createOscillator(), servoGain = ctx.createGain();
+      servo.type = "triangle";
+      servo.frequency.setValueAtTime(240, t);
+      servo.frequency.exponentialRampToValueAtTime(115, t + 0.16);
+      servoGain.gain.setValueAtTime(0.0001, t);
+      servoGain.gain.linearRampToValueAtTime(0.32, t + 0.03);
+      servoGain.gain.exponentialRampToValueAtTime(0.0001, t + 0.26);
+      servo.connect(servoGain); servoGain.connect(master);
+      servo.start(t); servo.stop(t + 0.28);
+      robotSfxNodes.push(servo);
+    }
+    robotSfxTimer = setTimeout(stopRobotMovementSfx, duration);
+  } catch (e) { stopRobotMovementSfx(); }
+}
+
+function toggleRobotHelmet(forceOn = null, withSound = true) {
+  const robot = document.getElementById("robotAvatar");
+  const button = document.getElementById("helmetToggle");
+  if (!robot) return false;
+  const nextOn = forceOn === null ? !robot.classList.contains("helmet-on") : Boolean(forceOn);
+  if (robot.classList.contains("helmet-on") === nextOn) return nextOn;
+  robot.classList.toggle("helmet-on", nextOn);
+  if (button) {
+    button.textContent = nextOn ? "⛨ Helm: On" : "⛨ Helm: Off";
+    button.setAttribute("aria-pressed", String(nextOn));
+    button.classList.toggle("active", nextOn);
+  }
+  setRobotGesture(nextOn ? "helmet-on" : "helmet-off", 950);
+  if (withSound) playRobotMovementSfx(900);
+  return nextOn;
+}
+
+function setRobotAction(action = "idle") {
+  if (action === "helmetOn") { toggleRobotHelmet(true); return; }
+  if (action === "helmetOff") { toggleRobotHelmet(false); return; }
+  const durations = { wave: 3000, hello: 2100, happy: 2200, laugh: 2200, dance: 4200, think: 2800, nod: 1800, shake: 1800, no: 1800, sad: 2400, right: 3200, left: 3200, both: 3600, raise_hand: 3200 };
+  if (action !== "idle" && durations[action]) playRobotMovementSfx(Math.min(durations[action], 2800));
+  else stopRobotMovementSfx();
+  setRobotGesture(action, durations[action] || 2400);
+}
+
+function detectRobotAction(text = "") {
+  const t = String(text).toLowerCase().replace(/[.,!?]/g, " ").replace(/\s+/g, " ").trim();
+  if (/(pakai|kenakan|pasang|gunakan).{0,18}helm|helm.{0,18}(pakai|pasang|kenakan)/.test(t)) return "helmetOn";
+  if (/(lepas|buka|copot).{0,18}helm|helm.{0,18}(lepas|buka|copot)/.test(t)) return "helmetOff";
+  if (/(angkat|acungkan|naikkan|angkatin).{0,24}(kedua|dua|dua-duanya|semua).{0,12}(tangan|lengan)/.test(t)) return "both";
+  if (/(angkat|acungkan|naikkan).{0,24}(tangan|lengan).{0,12}(kanan)|(tangan|lengan) kanan.{0,20}(angkat|naik|acung)/.test(t)) return "right";
+  if (/(angkat|acungkan|naikkan).{0,24}(tangan|lengan).{0,12}(kiri)|(tangan|lengan) kiri.{0,20}(angkat|naik|acung)/.test(t)) return "left";
+  if (/lamba(i|ikan)|dadah|melambai|sapa|hai jimmy|halo jimmy/.test(t)) return "wave";
+  if (/angkat (?:tangan|lengan)|acung(?:kan)? tangan/.test(t)) return "both";
+  if (/turunkan tangan|kembali normal|diam saja|berhenti bergerak/.test(t)) return "idle";
+  if (/joget|menari|dance|goyang|berdansa|nari/.test(t)) return "dance";
+  if (/senang|bahagia|gembira|semangat|hore|ketawa|tertawa|senyum/.test(t)) return "happy";
+  if (/pikir|berpikir|bingung|mikir/.test(t)) return "think";
+  if (/sedih|kecewa|maaf|sorry/.test(t)) return "sad";
+  if (/angguk|setuju/.test(t)) return "nod";
+  if (/geleng|tidak setuju/.test(t)) return "shake";
+  if (/berdiri|siap|bangun/.test(t)) return "hello";
+  return null;
+}
+
+function isPureRobotActionCommand(text = "") {
+  const t = String(text).toLowerCase().replace(/[.,!?]/g, " ")
+    .replace(/\b(jimmy|tolong|coba|ayo|yuk|dong|ya|sekarang|sebentar|sedikit|lagi|please)\b/g, " ")
+    .replace(/\s+/g, " ").trim();
+  return /^(pakai helm|kenakan helm|pasang helm|gunakan helm|lepas helm|buka helm|copot helm|joget|menari|dance|goyang|berdansa|nari|angkat tangan(?: kanan| kiri| kedua)?|lambaikan tangan|melambai|dadah|angguk|geleng|berdiri|diam|kembali normal|turunkan tangan|berhenti bergerak)$/.test(t);
+}
+
+function reactToInstruction(text = "") {
+  const action = detectRobotAction(text);
+  if (action) setRobotAction(action);
+  return action;
+}
+
+/* ====== AUTH & API ====== */
+async function apiPost(path, payload = {}) {
+  const response = await fetch(WORKER_URL + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ownerPassword, ...payload })
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+  return data;
+}
+
+async function login() {
+  const password = document.getElementById("password").value.trim();
+  const status = document.getElementById("loginStatus");
+  const button = document.getElementById("loginButton");
+  if (!password) { status.textContent = "Masukkan password Owner dulu."; return; }
+  button.disabled = true;
+  status.textContent = "Mengaktifkan unit Jimmy...";
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: "", ownerPassword: password })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok && response.status !== 400) throw new Error(data.error || "Login gagal.");
+    if (response.status === 400 && data.error !== "Pesan kosong.") throw new Error(data.error || "Login gagal.");
+
+    ownerPassword = password;
+    document.getElementById("login").classList.add("hidden");
+    setRobotEmotion("happy");
+    setRobotAction("wave");
+    loadMemoryBadges();
+    loadTasks();
+    loadNotes();
+  } catch (error) {
+    status.textContent = "Gagal masuk: " + error.message;
+  } finally { button.disabled = false; }
+}
+
+/* ====== TEXT CHAT ====== */
+function addMessage(text, who) {
+  if (!text || !text.trim()) return;
+  const chat = document.getElementById("chat");
+  const empty = document.getElementById("emptyChat");
+  if (empty) empty.remove();
+  const div = document.createElement("div");
+  div.className = "msg " + who;
+  div.textContent = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function handleChatSubmit(rawMessage, fromQuickBar = false) {
+  const message = (rawMessage || "").trim();
+  if (!message) return;
+  addMessage(message, "user");
+  const requestedAction = reactToInstruction(message);
+  if (requestedAction && isPureRobotActionCommand(message)) {
+    saveVoiceLog("user", message);
+    return;
+  }
+  if (fromQuickBar) document.getElementById("heroStatus").textContent = "Unit Jimmy sedang memproses...";
+  setRobotEmotion("thinking");
+  try {
+    const response = await fetch(WORKER_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message, ownerPassword })
+    });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || "Pesan gagal dikirim.");
+
+    const rawReply = data.reply || data.response || "Sistem belum dapat menjawab, Bos.";
+    const { cleanText, avatar: inlineAvatar } = extractInlineAvatarTag(rawReply);
+    const finalReply = cleanText || rawReply;
+
+    addMessage(finalReply, "jimmy");
+    applyAvatar(data.avatar || inlineAvatar || inferMoodFromReply(finalReply));
+
+    if (fromQuickBar) {
+      document.getElementById("heroStatus").textContent = "Unit Jimmy siap menerima instruksi, Bos.";
+      showStageBubble(finalReply);
+    }
+  } catch (error) {
+    setRobotEmotion("concerned");
+    const errText = "Koneksi terganggu: " + error.message;
+    addMessage(errText, "jimmy");
+    if (fromQuickBar) showStageBubble(errText);
+  }
+}
+
+function sendQuickMessage() {
+  const input = document.getElementById("quickMessage");
+  const msg = input.value;
+  input.value = "";
+  handleChatSubmit(msg, true);
+}
+
+function sendMessage() {
+  const input = document.getElementById("message");
+  const msg = input.value;
+  input.value = "";
+  handleChatSubmit(msg, false);
+}
+
+/* ====== VOICE LIVE & PODCAST ====== */
+function setStatus(text, sub = "") {
+  document.getElementById("status").textContent = text;
+  document.getElementById("statusSub").textContent = sub;
+  document.getElementById("heroStatus").textContent = text;
+}
+function toggleCallButton() { if (calling) stopCall(); else startCall(false); }
+
+function downsampleTo16k(buffer, inputRate) {
+  const ratio = inputRate / 16000, length = Math.floor(buffer.length / ratio), result = new Int16Array(length);
+  for (let i = 0; i < length; i++) {
+    const start = Math.floor(i * ratio), end = Math.floor((i + 1) * ratio);
+    let sum = 0, count = 0;
+    for (let j = start; j < end && j < buffer.length; j++) { sum += buffer[j]; count++; }
+    let sample = count ? sum / count : 0;
+    sample = Math.max(-1, Math.min(1, sample));
+    result[i] = sample < 0 ? sample * 32768 : sample * 32767;
+  }
+  return result;
+}
+function pcmToBase64(pcm) {
+  const bytes = new Uint8Array(pcm.buffer); let binary = ""; const chunk = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunk) binary += String.fromCharCode(...bytes.subarray(i, Math.min(i + chunk, bytes.length)));
+  return btoa(binary);
+}
+function base64ToInt16(base64) {
+  const binary = atob(base64); const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return new Int16Array(bytes.buffer);
+}
+
+function animateRobotMouth() {
+  const robot = document.getElementById("robotAvatar");
+  const coreGlow = document.getElementById("botCoreGlow");
+  if (!analyser || !audioContext || !calling) {
+    robot?.classList.remove("speaking");
+    document.documentElement.style.setProperty("--mouth-open", ".15");
+    mouthFrame = 0; return;
+  }
+  analyser.getByteTimeDomainData(analyserData);
+  let sum = 0;
+  for (let i = 0; i < analyserData.length; i++) { const v = (analyserData[i] - 128) / 128; sum += v * v; }
+  const rms = Math.sqrt(sum / analyserData.length);
+  const level = Math.max(.12, Math.min(1, rms * 12));
+  robot?.classList.toggle("speaking", rms > .018);
+  document.documentElement.style.setProperty("--mouth-open", String(level));
+  if (coreGlow) coreGlow.setAttribute("r", String(12 + level * 5));
+  mouthFrame = requestAnimationFrame(animateRobotMouth);
+}
+
+function playAudio(base64) {
+  if (!audioContext) return;
+  const pcm = base64ToInt16(base64);
+  const buffer = audioContext.createBuffer(1, pcm.length, 24000);
+  const channel = buffer.getChannelData(0);
+  for (let i = 0; i < pcm.length; i++) channel[i] = pcm[i] / 32768;
+  const source = audioContext.createBufferSource();
+  source.buffer = buffer;
+  source.connect(analyser || audioContext.destination);
+  const startAt = Math.max(audioContext.currentTime + 0.025, nextPlayTime);
+  source.start(startAt);
+  nextPlayTime = startAt + buffer.duration;
+  audioSources.push(source);
+  source.onended = () => { audioSources = audioSources.filter(item => item !== source); };
+  if (!mouthFrame) animateRobotMouth();
+}
+function stopAudioPlayback() {
+  audioSources.forEach(s => { try { s.stop(); } catch (e) {} });
+  audioSources = []; nextPlayTime = 0;
+  document.getElementById("robotAvatar")?.classList.remove("speaking");
+  document.getElementById("botCoreGlow")?.setAttribute("r", "13");
+  document.documentElement.style.setProperty("--mouth-open", ".15");
+}
+async function saveVoiceLog(role, message) {
+  if (!message || !message.trim()) return;
+  try { await apiPost("/voice-log", { role, message: message.trim() }); } catch (e) {}
+}
+
+function startMicrophoneStream() {
+  micSource = audioContext.createMediaStreamSource(microphone);
+  processor = audioContext.createScriptProcessor(4096, 1, 1);
+  processor.onaudioprocess = event => {
+    if (!calling || !socket || socket.readyState !== WebSocket.OPEN) return;
+    const input = event.inputBuffer.getChannelData(0);
+    let sumSquares = 0, peak = 0;
+    for (let i = 0; i < input.length; i++) {
+      const m = Math.abs(input[i]); if (m > peak) peak = m; sumSquares += input[i] * input[i];
+    }
+    const rms = Math.sqrt(sumSquares / input.length);
+    const likelySpeech = rms >= 0.017 || (peak >= 0.060 && rms >= 0.008);
+    const cleaned = new Float32Array(input.length);
+    if (likelySpeech) for (let i = 0; i < input.length; i++) cleaned[i] = Math.abs(input[i]) < 0.0055 ? 0 : input[i];
+    const pcm = downsampleTo16k(cleaned, audioContext.sampleRate);
+    socket.send(JSON.stringify({ realtimeInput: { audio: { mimeType: "audio/pcm;rate=16000", data: pcmToBase64(pcm) } } }));
+  };
+  micSource.connect(processor);
+  processor.connect(audioContext.destination);
+}
+
+async function startCall(asPodcast = false) {
+  if (calling) return;
+  podcastMode = asPodcast; podcastStopped = false;
+  if (asPodcast) {
+    podcastTopic = document.getElementById("podcastTopic").value.trim() || "Obrolan menarik seputar robotika, teknologi, dan masa depan";
+    podcastPart = 0;
+    document.getElementById("podcastStart").disabled = true;
+    document.getElementById("podcastStop").classList.remove("hidden");
+    document.getElementById("podcastInfo").textContent = "Menyiapkan siaran podcast...";
+  }
+  const button = document.getElementById("callButton");
+  button.disabled = true;
+  setStatus("Mengaktifkan sensor audio...", "Izinkan akses mikrofon jika diminta.");
+  try {
+    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    await audioContext.resume();
+    analyser = audioContext.createAnalyser(); analyser.fftSize = 512; analyser.smoothingTimeConstant = .62;
+    analyserData = new Uint8Array(analyser.frequencyBinCount);
+    analyser.connect(audioContext.destination);
+    if (!asPodcast) microphone = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: false } });
+    setStatus("Menghubungkan ke Gemini Live...", "Sebentar ya, Bos.");
+    const tokenData = await apiPost("/live-token", {});
+    const wsUrl = "wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1beta.GenerativeService.BidiGenerateContentConstrained?access_token=" + encodeURIComponent(tokenData.token);
+    socket = new WebSocket(wsUrl);
+    socket.onopen = () => {
+      socket.send(JSON.stringify({
+        setup: {
+          model: tokenData.model,
+          generationConfig: { responseModalities: ["AUDIO"], speechConfig: { languageCode: "id-ID", voiceConfig: { prebuiltVoiceConfig: { voiceName: "Charon" } } } },
+          systemInstruction: { parts: [{ text: tokenData.systemInstruction + "\n\nIDENTITAS ROBOT & ATURAN SESI SUARA: Kamu adalah Jimmy, unit robot AI berwujud mekanis titanium di layar Owner. Bersikaplah cerdas, hangat, kritis, dan natural sebagai robot partner yang bangga akan identitas digitalnya. Ketika Owner memberi perintah gerakan murni seperti joget, menari, melambai, pakai helm, atau angkat tangan, jangan ucapkan konfirmasi verbal. Jika Owner sekaligus bertanya, jawab pertanyaannya dalam Bahasa Indonesia santai." }] },
+          inputAudioTranscription: {}, outputAudioTranscription: {}
+        }
+      }));
+    };
+    socket.onmessage = async event => {
+      let raw = event.data; if (raw instanceof Blob) raw = await raw.text();
+      const data = JSON.parse(raw);
+      if (data.setupComplete) {
+        calling = true; button.disabled = false; callStartedAt = Date.now();
+        button.classList.add("end"); button.textContent = "■";
+        document.getElementById("callWrap").classList.add("active");
+        setRobotEmotion("happy");
+        setStatus("Jimmy mendengarkan...", "Silakan bicara langsung, Bos.");
+        statusTimer = setInterval(() => {
+          if (!calling) return;
+          const s = Math.floor((Date.now() - callStartedAt) / 1000);
+          document.getElementById("statusSub").textContent = `Audio aktif · ${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+        }, 1000);
+        if (podcastMode) { setStatus("Jimmy membawakan podcast...", "Topik: " + podcastTopic); requestPodcastPart(true); }
+        else startMicrophoneStream();
+      }
+      if (data.serverContent) {
+        const c = data.serverContent;
+        if (c.inputTranscription?.text) {
+          pendingUserText += c.inputTranscription.text;
+          const a = detectRobotAction(pendingUserText);
+          if (a && a !== lastVoiceAction) { setRobotAction(a); lastVoiceAction = a; }
+          if (a && isPureRobotActionCommand(pendingUserText)) suppressActionSpeech = true;
+        }
+        if (c.outputTranscription?.text) pendingJimmyText += c.outputTranscription.text;
+        if (c.interrupted) { stopAudioPlayback(); setStatus("Jimmy disela.", "Silakan lanjut bicara."); }
+        if (!suppressActionSpeech) for (const p of (c.modelTurn?.parts || [])) if (p.inlineData?.data) playAudio(p.inlineData.data);
+        if (c.turnComplete) {
+          if (pendingUserText.trim()) saveVoiceLog("user", pendingUserText);
+          if (pendingJimmyText.trim()) { saveVoiceLog("assistant", pendingJimmyText); reactToInstruction(pendingUserText); }
+          pendingUserText = ""; pendingJimmyText = ""; lastVoiceAction = null; suppressActionSpeech = false;
+          if (podcastMode && !podcastStopped) {
+            if (podcastPart < podcastMaxParts) {
+              document.getElementById("podcastInfo").textContent = "Bagian " + podcastPart + " selesai. Menyambung...";
+              requestPodcastPart(false);
+            } else {
+              document.getElementById("podcastInfo").textContent = "Podcast selesai setelah " + podcastPart + " bagian.";
+              podcastMode = false; document.getElementById("podcastStart").disabled = false; document.getElementById("podcastStop").classList.add("hidden");
+            }
+          } else {
+            setStatus("Jimmy siap mendengarkan lagi...", "Transkrip suara tersimpan di Cloud D1.");
+          }
+        }
+      }
+      if (data.error) setStatus("Error Gemini: " + (data.error.message || "Tidak diketahui"), "Coba mulai ulang panggilan.");
+    };
+    socket.onerror = () => setStatus("Koneksi Gemini Live terganggu.", "Periksa internet lalu coba lagi.");
+    socket.onclose = () => { if (calling) stopCall(); };
+  } catch (error) {
+    setStatus("Gagal memulai audio.", error.message);
+    button.disabled = false;
+    if (microphone) { microphone.getTracks().forEach(t => t.stop()); microphone = null; }
+    if (audioContext) { await audioContext.close(); audioContext = null; }
+  }
+}
+
+function requestPodcastPart(first) {
+  if (!socket || socket.readyState !== WebSocket.OPEN || !podcastMode || podcastStopped) return;
+  podcastPart++;
+  const prompt = first
+    ? "Mulai podcast berbahasa Indonesia dengan topik: " + podcastTopic + ". Jadilah host podcast robot AI yang cerdas, hangat, santai, dan enak didengar. Sampaikan segmen panjang sekitar 60-90 detik."
+    : "Lanjutkan podcast tentang " + podcastTopic + " tanpa salam pembuka, tanpa mengulang, langsung sambung gagasan terakhir secara natural.";
+  document.getElementById("podcastInfo").textContent = "Menyiapkan segmen " + podcastPart + "...";
+  socket.send(JSON.stringify({ clientContent: { turns: [{ role: "user", parts: [{ text: prompt }] }], turnComplete: true } }));
+}
+function startPodcast() { if (!calling) startCall(true); }
+async function stopCall() {
+  stopRobotMovementSfx(); calling = false; podcastStopped = true; podcastMode = false;
+  document.getElementById("podcastStart").disabled = false;
+  document.getElementById("podcastStop").classList.add("hidden");
+  if (mouthFrame) cancelAnimationFrame(mouthFrame); mouthFrame = 0; analyser = null; analyserData = null;
+  if (statusTimer) { clearInterval(statusTimer); statusTimer = null; }
+  if (processor) { processor.disconnect(); processor.onaudioprocess = null; processor = null; }
+  if (micSource) { micSource.disconnect(); micSource = null; }
+  if (microphone) { microphone.getTracks().forEach(t => t.stop()); microphone = null; }
+  if (socket) {
+    const old = socket; socket = null;
+    if (old.readyState === WebSocket.OPEN) { try { old.send(JSON.stringify({ realtimeInput: { audioStreamEnd: true } })); } catch (e) {} }
+    try { old.close(); } catch (e) {}
+  }
+  stopAudioPlayback();
+  if (audioContext) { try { await audioContext.close(); } catch (e) {} audioContext = null; }
+  const b = document.getElementById("callButton");
+  b.classList.remove("end"); b.textContent = "☎"; b.disabled = false;
+  document.getElementById("callWrap").classList.remove("active");
+  setStatus("Koneksi suara ditutup.", "Tekan tombol untuk bicara lagi.");
+}
+
+/* ====== MEMORY BADGES ====== */
+function renderMemoryBadges(badges, archive = []) {
+  const list = document.getElementById("memoryList");
+  const all = badges || [];
+  document.getElementById("memoryTotal").textContent = String(all.length);
+  list.replaceChildren();
+  if (!all.length && !archive.length) {
+    const empty = document.createElement("div"); empty.style.cssText = "text-align:center;color:var(--muted);font-size:12px;padding:16px";
+    empty.textContent = "Belum ada lencana memori."; list.appendChild(empty); return;
+  }
+  all.forEach(item => {
+    const row = document.createElement("div"); row.className = "item-card";
+    const main = document.createElement("div"); main.className = "item-main";
+    const t = document.createElement("div"); t.className = "item-title"; t.textContent = item.title || item.category;
+    const c = document.createElement("div"); c.className = "item-body"; c.textContent = item.content;
+    const m = document.createElement("div"); m.className = "item-meta"; m.textContent = `${item.category} · ${item.source === "manual" ? "Manual" : "Otomatis"}`;
+    main.append(t, c, m); row.appendChild(main); list.appendChild(row);
+  });
+  archive.forEach(item => {
+    const row = document.createElement("div"); row.className = "item-card";
+    const main = document.createElement("div"); main.className = "item-main";
+    const t = document.createElement("div"); t.className = "item-title"; t.textContent = "Arsip Percakapan";
+    const c = document.createElement("div"); c.className = "item-body"; c.textContent = item.content;
+    main.append(t, c); row.appendChild(main); list.appendChild(row);
+  });
+}
+async function loadMemoryBadges() {
+  if (!ownerPassword) return;
+  try { const data = await apiPost("/memory-badges/list"); renderMemoryBadges(data.badges || []); }
+  catch (e) { document.getElementById("memoryStatus").textContent = e.message; }
+}
+async function searchMemory() {
+  const query = document.getElementById("memorySearch").value.trim();
+  if (!query) return loadMemoryBadges();
+  try {
+    const data = await apiPost("/memory-badges/search", { query });
+    renderMemoryBadges(data.results || [], data.archive || []);
+    document.getElementById("memoryStatus").textContent = "Hasil: " + query;
+  } catch (e) { document.getElementById("memoryStatus").textContent = e.message; }
+}
+async function saveMemory() {
+  const input = document.getElementById("memoryNew");
+  const content = input.value.trim();
+  if (!content) return;
+  try {
+    await apiPost("/memory-badges/save", { title: content.slice(0, 72), category: "Ingatan khusus", content });
+    input.value = ""; document.getElementById("memoryStatus").textContent = "Lencana memori tersimpan.";
+    await loadMemoryBadges();
+  } catch (e) { document.getElementById("memoryStatus").textContent = e.message; }
+}
+
+/* ====== TASKS & NOTES ====== */
+let editingTaskId = null, editingNoteId = null;
+function formatDateID(v) {
+  if (!v) return "Tanpa tenggat";
+  const d = new Date(v + (v.length === 10 ? "T00:00:00" : ""));
+  return Number.isNaN(d.getTime()) ? v : d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+}
+function resetTaskForm() { editingTaskId = null; document.getElementById("taskForm").reset(); document.getElementById("taskSaveButton").textContent = "Tambah tugas"; }
+async function loadTasks() {
+  if (!ownerPassword) return;
+  try {
+    const filter = document.getElementById("taskFilter")?.value || "all";
+    const data = await apiPost("/tasks/list", { status: filter });
+    const tasks = data.tasks || [];
+    document.getElementById("taskCount").textContent = `${tasks.length} tugas`;
+    const list = document.getElementById("taskList");
+    list.replaceChildren();
+    if (!tasks.length) { list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">Belum ada tugas.</div>'; return; }
+    tasks.forEach(task => {
+      const row = document.createElement("div"); row.className = "item-card" + (task.status === "done" ? " task-done" : "");
+      const chk = document.createElement("input"); chk.type = "checkbox"; chk.className = "task-check"; chk.checked = task.status === "done";
+      chk.onchange = () => updateTaskStatus(task.id, chk.checked ? "done" : "open");
+      const main = document.createElement("div"); main.className = "item-main";
+      const t = document.createElement("div"); t.className = "item-title"; t.textContent = task.title;
+      const b = document.createElement("div"); b.className = "item-body"; b.textContent = task.description || "";
+      const m = document.createElement("div"); m.className = "item-meta"; m.textContent = `${task.priority} · ${formatDateID(task.due_date)}`;
+      const act = document.createElement("div"); act.style.cssText = "display:flex;gap:6px;margin-top:6px";
+      const ed = document.createElement("button"); ed.type = "button"; ed.className = "btn-secondary"; ed.style.padding = "5px 9px"; ed.textContent = "Edit"; ed.onclick = () => editTask(task);
+      const rm = document.createElement("button"); rm.type = "button"; rm.className = "btn-danger"; rm.textContent = "Hapus"; rm.onclick = () => deleteTask(task.id);
+      act.append(ed, rm); main.append(t); if (task.description) main.append(b); main.append(m, act); row.append(chk, main); list.appendChild(row);
+    });
+  } catch (e) { document.getElementById("taskStatus").textContent = e.message; }
+}
+function editTask(task) {
+  editingTaskId = task.id;
+  document.getElementById("taskTitle").value = task.title || "";
+  document.getElementById("taskDescription").value = task.description || "";
+  document.getElementById("taskPriority").value = task.priority || "normal";
+  document.getElementById("taskDueDate").value = task.due_date || "";
+  document.getElementById("taskSaveButton").textContent = "Perbarui tugas";
+}
+async function saveTask(e) {
+  e.preventDefault();
+  const payload = {
+    title: document.getElementById("taskTitle").value.trim(),
+    description: document.getElementById("taskDescription").value.trim(),
+    priority: document.getElementById("taskPriority").value,
+    dueDate: document.getElementById("taskDueDate").value || null
+  };
+  if (!payload.title) return;
+  if (editingTaskId) payload.id = editingTaskId;
+  try {
+    await apiPost(editingTaskId ? "/tasks/update" : "/tasks/create", payload);
+    resetTaskForm(); document.getElementById("taskStatus").textContent = "Tugas tersimpan."; await loadTasks();
+  } catch (err) { document.getElementById("taskStatus").textContent = err.message; }
+}
+async function updateTaskStatus(id, status) {
+  try { await apiPost("/tasks/status", { id, status }); await loadTasks(); }
+  catch (err) { document.getElementById("taskStatus").textContent = err.message; await loadTasks(); }
+}
+async function deleteTask(id) {
+  if (!confirm("Hapus tugas ini?")) return;
+  try { await apiPost("/tasks/delete", { id }); await loadTasks(); }
+  catch (err) { document.getElementById("taskStatus").textContent = err.message; }
+}
+
+function resetNoteForm() { editingNoteId = null; document.getElementById("noteForm").reset(); document.getElementById("noteSaveButton").textContent = "Simpan catatan"; }
+async function loadNotes() {
+  if (!ownerPassword) return;
+  try {
+    const data = await apiPost("/notes/list");
+    const notes = data.notes || [];
+    document.getElementById("noteCount").textContent = `${notes.length} catatan`;
+    const list = document.getElementById("noteList");
+    list.replaceChildren();
+    if (!notes.length) { list.innerHTML = '<div style="text-align:center;color:var(--muted);font-size:12px;padding:12px">Belum ada catatan.</div>'; return; }
+    notes.forEach(note => {
+      const row = document.createElement("div"); row.className = "item-card";
+      const main = document.createElement("div"); main.className = "item-main";
+      const t = document.createElement("div"); t.className = "item-title"; t.textContent = note.title;
+      const b = document.createElement("div"); b.className = "item-body"; b.textContent = note.content;
+      const m = document.createElement("div"); m.className = "item-meta"; m.textContent = "Diperbarui " + formatDateID((note.updated_at || "").slice(0, 10));
+      const act = document.createElement("div"); act.style.cssText = "display:flex;gap:6px;margin-top:6px";
+      const ed = document.createElement("button"); ed.type = "button"; ed.className = "btn-secondary"; ed.style.padding = "5px 9px"; ed.textContent = "Edit"; ed.onclick = () => editNote(note);
+      const rm = document.createElement("button"); rm.type = "button"; rm.className = "btn-danger"; rm.textContent = "Hapus"; rm.onclick = () => deleteNote(note.id);
+      act.append(ed, rm); main.append(t, b, m, act); row.appendChild(main); list.appendChild(row);
+    });
+  } catch (err) { document.getElementById("noteStatus").textContent = err.message; }
+}
+function editNote(note) {
+  editingNoteId = note.id;
+  document.getElementById("noteTitle").value = note.title || "";
+  document.getElementById("noteContent").value = note.content || "";
+  document.getElementById("noteSaveButton").textContent = "Perbarui catatan";
+}
+async function saveNote(e) {
+  e.preventDefault();
+  const payload = { title: document.getElementById("noteTitle").value.trim(), content: document.getElementById("noteContent").value.trim() };
+  if (!payload.title || !payload.content) return;
+  if (editingNoteId) payload.id = editingNoteId;
+  try {
+    await apiPost("/notes/save", payload);
+    resetNoteForm(); document.getElementById("noteStatus").textContent = "Catatan tersimpan."; await loadNotes();
+  } catch (err) { document.getElementById("noteStatus").textContent = err.message; }
+}
+async function deleteNote(id) {
+  if (!confirm("Hapus catatan ini?")) return;
+  try { await apiPost("/notes/delete", { id }); await loadNotes(); }
+  catch (err) { document.getElementById("noteStatus").textContent = err.message; }
+}
+
+document.getElementById("password").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+</script>
+</body>
+</html>
